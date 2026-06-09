@@ -2599,12 +2599,12 @@ function getCajaConsolidada(){
   data.gastos.filter(g=>(g.estado||'Pagada')==='Pagada').forEach(g=>movs.push({id:'gasto_'+g.id,fecha:g.fecha,desc:g.desc+(g.cat?' ['+g.cat+']':''),origen:'Gasto',tipo:'salida',monto:g.monto,esManual:false}));
   data.proveedores.filter(p=>p.estado==='Pagado').forEach(p=>movs.push({id:'prov_'+p.id,fecha:p.fecha,desc:p.nombre+(p.prod?' — '+p.prod:''),origen:'Proveedor',tipo:'salida',monto:p.monto,esManual:false}));
   data.sueldos.filter(s=>s.estado==='Pagado').forEach(s=>{
-    // Convert YYYY-MM to YYYY-MM-DD (last day of month) for proper date filtering
-    let fechaSue=s.mes||'';
-    if(fechaSue&&fechaSue.length===7){
-      const[y,m]=fechaSue.split('-').map(Number);
+    // Use payment date (s.fecha) first, fall back to last day of period month
+    let fechaSue=s.fecha||'';
+    if(!fechaSue&&s.mes&&s.mes.length===7){
+      const[y,m]=s.mes.split('-').map(Number);
       const lastDay=new Date(y,m,0).getDate();
-      fechaSue=fechaSue+'-'+String(lastDay).padStart(2,'0');
+      fechaSue=s.mes+'-'+String(lastDay).padStart(2,'0');
     }
     movs.push({id:'sue_'+s.id,fecha:fechaSue,desc:'Sueldo — '+s.nombre+(s.cargo?' ('+s.cargo+')':''),origen:'Sueldo',tipo:'salida',monto:s.monto,esManual:false});
   });
